@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id              String   @id @default(uuid())
+  name            String
+  position        String
+  office_location String
+  entry_date      DateTime
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  targets         Target[]
+
+  @@map("employees")
+}
+
+model Target {
+  id          String   @id @default(uuid())
+  employee_id String
+  product_id  String
+  nominal     Int
+  date        DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  employee    Employee?    @relation(fields: [employee_id], references: [id])
+  Product     Product?     @relation(fields: [product_id], references: [id])
+  Achievement Achievement?
+
+  @@index([employee_id])
+  @@index([product_id])
+}
+
+model Achievement {
+  id         String   @id @default(uuid())
+  target_id  String   @unique
+  nominal    Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  target Target @relation(fields: [target_id], references: [id])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  category_id String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  category Category @relation(fields: [category_id], references: [id])
+  targets  Target[]
+}
+
+model Category {
+  id         String   @id @default(uuid())
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  products Product[]
+}
