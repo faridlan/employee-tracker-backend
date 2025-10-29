@@ -1,4 +1,4 @@
-import { IsUUID, IsInt, IsDateString } from 'class-validator';
+import { IsUUID, IsInt, Min, Max } from 'class-validator';
 
 export class CreateTargetDto {
   @IsUUID()
@@ -10,6 +10,11 @@ export class CreateTargetDto {
   @IsInt()
   nominal: number;
 
-  @IsDateString()
-  date: string;
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month: number;
+
+  @IsInt()
+  year: number;
 }

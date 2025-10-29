@@ -7,3 +7,8 @@ export class CreateAchievementDto {
   @IsInt()
   nominal: number;
 }
+
+export class UpdateAchievementDto {
+  @IsInt()
+  nominal: number;
+}

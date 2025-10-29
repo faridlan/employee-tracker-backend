@@ -1,6 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { AchievementService } from './achievement.service';
-import { CreateAchievementDto } from './dto/create-achievement.dto';
+import {
+  CreateAchievementDto,
+  UpdateAchievementDto,
+} from './dto/create-achievement.dto';
 
 @Controller('achievements')
 export class AchievementController {
@@ -9,6 +12,14 @@ export class AchievementController {
   @Post()
   create(@Body() dto: CreateAchievementDto) {
     return this.achievementService.create(dto);
+  }
+
+  @Put(':targetId')
+  update(
+    @Param('targetId') targetId: string,
+    @Body() dto: UpdateAchievementDto,
+  ) {
+    return this.achievementService.update(targetId, dto);
   }
 
   @Get()

@@ -7,9 +7,10 @@ import { TargetModule } from './target/target.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [PrismaModule, EmployeeModule, TargetModule, AchievementModule, CategoryModule, ProductModule],
+  imports: [PrismaModule, EmployeeModule, TargetModule, AchievementModule, CategoryModule, ProductModule, AnalyticsModule],
   controllers: [AppController],
   providers: [AppService],
 })
