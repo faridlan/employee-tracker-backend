@@ -1,6 +1,13 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dro/create-product.dto';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -17,7 +24,9 @@ export class ProductController {
   }
 
   @Get(':id')
-  findById(id: string) {
-    return this.productService.findById(id);
+  async findById(@Param('id') id: string) {
+    const product = await this.productService.findById(id);
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 }

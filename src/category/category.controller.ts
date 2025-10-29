@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
@@ -17,7 +24,9 @@ export class CategoryController {
   }
 
   @Get(':id')
-  findById(id: string) {
-    return this.categoryService.findById(id);
+  async findById(@Param('id') id: string) {
+    const category = await this.categoryService.findById(id);
+    if (!category) throw new NotFoundException('Category not found');
+    return category;
   }
 }
