@@ -102,4 +102,47 @@ export class AnalyticsService {
           data.target > 0 ? (data.achievement / data.target) * 100 : 0,
       }));
   }
+
+  async getTopEmployeesByAchievement() {
+    const employees = await this.prisma.employee.findMany({
+      include: {
+        targets: {
+          include: { Achievement: true },
+        },
+      },
+    });
+
+    const ranked = employees
+      .map((emp) => {
+        // type-safe handling
+        const targets = emp.targets as (Target & {
+          Achievement: Achievement | null;
+        })[];
+
+        const totalTarget = targets.reduce(
+          (sum, t) => sum + (t.nominal || 0),
+          0,
+        );
+        const totalAchieved = targets.reduce(
+          (sum, t) => sum + (t.Achievement?.nominal || 0),
+          0,
+        );
+
+        const achievement_rate =
+          totalTarget > 0 ? (totalAchieved / totalTarget) * 100 : 0;
+
+        return {
+          employee_id: emp.id,
+          name: emp.name,
+          office_location: emp.office_location,
+          total_target: totalTarget,
+          total_achievement: totalAchieved,
+          achievement_rate: Number(achievement_rate.toFixed(2)),
+        };
+      })
+      .sort((a, b) => b.achievement_rate - a.achievement_rate)
+      .slice(0, 5);
+
+    return ranked;
+  }
 }

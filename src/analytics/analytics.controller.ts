@@ -31,4 +31,9 @@ export class AnalyticsController {
     const parsedYear = year ? Number(year) : undefined;
     return this.analyticsService.getOverallMonthlySummary(parsedYear);
   }
+
+  @Get('employees/top-achievers')
+  getTopEmployees() {
+    return this.analyticsService.getTopEmployeesByAchievement();
+  }
 }
