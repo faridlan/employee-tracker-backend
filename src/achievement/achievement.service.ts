@@ -50,7 +50,9 @@ export class AchievementService {
 
   async findAll() {
     return this.prisma.achievement.findMany({
-      include: { target: true },
+      include: {
+        target: { include: { employee: true, Product: true } },
+      },
       orderBy: { created_at: 'desc' },
     });
   }

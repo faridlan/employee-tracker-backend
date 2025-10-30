@@ -34,7 +34,7 @@ export class TargetService {
 
   async findAll() {
     return this.prisma.target.findMany({
-      include: { employee: true, Achievement: true },
+      include: { employee: true, Achievement: true, Product: true },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
   }
