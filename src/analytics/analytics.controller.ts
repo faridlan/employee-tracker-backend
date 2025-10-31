@@ -33,7 +33,8 @@ export class AnalyticsController {
   }
 
   @Get('employees/top-achievers')
-  getTopEmployees() {
-    return this.analyticsService.getTopEmployeesByAchievement();
+  getTopEmployees(@Query('year') year?: string) {
+    const yearNumber = year ? Number(year) : undefined;
+    return this.analyticsService.getTopEmployeesByAchievement(yearNumber);
   }
 }

@@ -15,7 +15,9 @@ export class EmployeeService {
   async findOne(id: string) {
     return this.prisma.employee.findUnique({
       where: { id },
-      include: { targets: true },
+      include: {
+        targets: { include: { Product: true, Achievement: true } },
+      },
     });
   }
 

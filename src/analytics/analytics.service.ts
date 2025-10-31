@@ -103,10 +103,11 @@ export class AnalyticsService {
       }));
   }
 
-  async getTopEmployeesByAchievement() {
+  async getTopEmployeesByAchievement(year?: number) {
     const employees = await this.prisma.employee.findMany({
       include: {
         targets: {
+          where: year ? { year } : {}, // 🧠 filter by year if provided
           include: { Achievement: true },
         },
       },
@@ -114,7 +115,6 @@ export class AnalyticsService {
 
     const ranked = employees
       .map((emp) => {
-        // type-safe handling
         const targets = emp.targets as (Target & {
           Achievement: Achievement | null;
         })[];
