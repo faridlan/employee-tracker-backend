@@ -25,6 +25,7 @@ export class AnalyticsService {
 
       return {
         month: `${t.year}-${String(t.month).padStart(2, '0')}`,
+        year: t.year,
         target: t.nominal,
         achievement: achievementNominal,
         percentage,
