@@ -5,9 +5,12 @@ import {
   NotFoundException,
   Param,
   Post,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { TargetService } from './target.service';
 import { CreateTargetDto } from './dto/create-target.dto';
+import { UpdateTargetDto } from './dto/update-target.dto';
 
 @Controller('targets')
 export class TargetController {
@@ -26,9 +29,18 @@ export class TargetController {
   @Get('employee/:employeeId')
   async findByEmployeeId(@Param('employeeId') employeeId: string) {
     const targets = await this.targetService.findByEmployeeId(employeeId);
-    if (!targets.length) {
+    if (!targets.length)
       throw new NotFoundException('No targets found for this employee');
-    }
     return targets;
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateTargetDto) {
+    return this.targetService.update(id, dto);
+  }
+
+  @Delete(':id')
+  softDelete(@Param('id') id: string) {
+    return this.targetService.softDelete(id);
   }
 }

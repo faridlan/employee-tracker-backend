@@ -27,14 +27,15 @@ model Employee {
 }
 
 model Target {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   employee_id String
   product_id  String
   nominal     Int
   month       Int // NEW: store month number (1–12)
   year        Int // NEW: store year for easier querying
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
 
   employee    Employee?    @relation(fields: [employee_id], references: [id])
   Product     Product?     @relation(fields: [product_id], references: [id])
