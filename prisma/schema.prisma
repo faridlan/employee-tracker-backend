@@ -14,14 +14,16 @@ datasource db {
 }
 
 model Employee {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   name            String
   position        String
   office_location String
   entry_date      DateTime
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  targets         Target[]
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  targets Target[]
 
   @@map("employees")
 }

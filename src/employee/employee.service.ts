@@ -8,19 +8,27 @@ export class EmployeeService {
 
   async findAll() {
     return this.prisma.employee.findMany({
-      include: { targets: true },
-    });
-  }
-
-  async findOne(id: string) {
-    return this.prisma.employee.findUnique({
-      where: { id },
+      where: { deleted_at: null }, // ✅ don’t show deleted employees
       include: {
-        targets: { include: { Product: true, Achievement: true } },
+        targets: {
+          where: { deleted_at: null }, // ✅ don’t show deleted targets
+          include: { Product: true, Achievement: true },
+        },
       },
     });
   }
 
+  async findOne(id: string) {
+    return this.prisma.employee.findFirst({
+      where: { id, deleted_at: null },
+      include: {
+        targets: {
+          where: { deleted_at: null }, // ✅ only active targets
+          include: { Product: true, Achievement: true },
+        },
+      },
+    });
+  }
   async create(data: Prisma.EmployeeCreateInput) {
     return this.prisma.employee.create({ data });
   }
@@ -32,7 +40,20 @@ export class EmployeeService {
     });
   }
 
-  async delete(id: string) {
+  /**
+   * Soft Delete — just set deleted_at timestamp
+   */
+  async softDelete(id: string) {
+    return this.prisma.employee.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+  }
+
+  /**
+   * Optional: Hard delete (permanently)
+   */
+  async hardDelete(id: string) {
     return this.prisma.employee.delete({ where: { id } });
   }
 }

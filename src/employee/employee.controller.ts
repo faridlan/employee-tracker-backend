@@ -34,8 +34,19 @@ export class EmployeeController {
     return this.employeeService.update(id, data);
   }
 
-  @Delete('id')
-  delete(@Param('id') id: string) {
-    return this.employeeService.delete(id);
+  /**
+   * Soft delete employee
+   */
+  @Delete(':id')
+  softDelete(@Param('id') id: string) {
+    return this.employeeService.softDelete(id);
   }
+
+  /**
+   * Uncomment if you want a hard delete route
+   */
+  // @Delete(':id/hard')
+  // hardDelete(@Param('id') id: string) {
+  //   return this.employeeService.hardDelete(id);
+  // }
 }

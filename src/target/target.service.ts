@@ -74,13 +74,31 @@ export class TargetService {
   }
 
   async softDelete(id: string) {
-    const target = await this.prisma.target.findUnique({ where: { id } });
+    const target = await this.prisma.target.findUnique({
+      where: { id },
+      include: { Achievement: true },
+    });
+
     if (!target || target.deleted_at)
       throw new NotFoundException('Target not found');
 
-    return this.prisma.target.update({
-      where: { id },
-      data: { deleted_at: new Date() },
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Hard delete achievement if exists
+      if (target.Achievement) {
+        await tx.achievement.delete({
+          where: { target_id: id },
+        });
+      }
+
+      // 2. Soft delete target
+      await tx.target.update({
+        where: { id },
+        data: { deleted_at: new Date() },
+      });
+
+      return {
+        message: 'Target deleted and related Achievement permanently removed',
+      };
     });
   }
 }
