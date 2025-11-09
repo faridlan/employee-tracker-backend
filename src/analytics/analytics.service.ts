@@ -106,10 +106,16 @@ export class AnalyticsService {
 
   async getTopEmployeesByAchievement(year?: number) {
     const employees = await this.prisma.employee.findMany({
+      where: { deleted_at: null },
       include: {
         targets: {
-          where: year ? { year } : {}, // 🧠 filter by year if provided
-          include: { Achievement: true },
+          where: {
+            deleted_at: null,
+            ...(year && { year }),
+          },
+          include: {
+            Achievement: true,
+          },
         },
       },
     });
