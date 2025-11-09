@@ -8,7 +8,7 @@ export class CreateTargetDto {
   product_id: string;
 
   @IsInt()
-  nominal: number;
+  nominal: bigint; // <-- JS number supports BigInt up to 9e15 safely
 
   @IsInt()
   @Min(1)

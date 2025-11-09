@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTargetDto } from './create-target.dto';
 import { IsInt, Max, Min, IsUUID, IsOptional } from 'class-validator';
@@ -14,7 +13,7 @@ export class UpdateTargetDto extends PartialType(CreateTargetDto) {
 
   @IsOptional()
   @IsInt()
-  nominal?: number;
+  nominal?: bigint;
 
   @IsOptional()
   @IsInt()

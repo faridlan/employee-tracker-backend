@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { enableBigIntJsonSerialization } from './utils/bigint-serializer';
 
 async function bootstrap() {
+  enableBigIntJsonSerialization();
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(

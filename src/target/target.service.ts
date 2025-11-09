@@ -12,9 +12,23 @@ export class TargetService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateTargetDto) {
+    // 1. Check product exists & category active
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id: data.product_id,
+        category: { deleted_at: null },
+      },
+    });
+
+    if (!product) {
+      throw new BadRequestException('Product not found or inactive');
+    }
+
+    // 2. Check if same product target exists for same employee-month-year
     const exists = await this.prisma.target.findFirst({
       where: {
         employee_id: data.employee_id,
+        product_id: data.product_id,
         month: data.month,
         year: data.year,
         deleted_at: null,
@@ -23,10 +37,11 @@ export class TargetService {
 
     if (exists) {
       throw new BadRequestException(
-        `Target for employee already exists for ${data.month}/${data.year}`,
+        `Employee already has a target for this product in ${data.month}/${data.year}`,
       );
     }
 
+    // 3. Create new Target
     return this.prisma.target.create({ data });
   }
 
@@ -34,7 +49,7 @@ export class TargetService {
     return this.prisma.target.findMany({
       where: { deleted_at: null },
       include: { employee: true, Achievement: true, Product: true },
-      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+      orderBy: [{ created_at: 'desc' }, { year: 'desc' }, { month: 'desc' }],
     });
   }
 
@@ -52,11 +67,12 @@ export class TargetService {
       throw new NotFoundException('Target not found');
 
     // validate unique month-year rule only if month/year or employee change
-    if (data.month || data.year || data.employee_id) {
+    if (data.month || data.year || data.employee_id || data.product_id) {
       const exists = await this.prisma.target.findFirst({
         where: {
           id: { not: id },
           employee_id: data.employee_id ?? target.employee_id,
+          product_id: data.product_id ?? target.product_id,
           month: data.month ?? target.month,
           year: data.year ?? target.year,
           deleted_at: null,
@@ -65,7 +81,7 @@ export class TargetService {
 
       if (exists) {
         throw new BadRequestException(
-          `Employee already has target for that month & year`,
+          `Employee already has a target for this product in that month & year`,
         );
       }
     }

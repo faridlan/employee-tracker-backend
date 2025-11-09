@@ -19,22 +19,23 @@ export class AnalyticsService {
     })) as (Target & { Achievement: Achievement | null })[];
 
     return targets.map((t) => {
-      const achievementNominal = t.Achievement?.nominal ?? 0;
+      const targetNominal = Number(t.nominal);
+      const achievementNominal = Number(t.Achievement?.nominal ?? 0);
+
       const percentage =
-        t.nominal > 0 ? (achievementNominal / t.nominal) * 100 : 0;
+        targetNominal > 0 ? (achievementNominal / targetNominal) * 100 : 0;
 
       return {
         month: `${t.year}-${String(t.month).padStart(2, '0')}`,
         year: t.year,
-        target: t.nominal,
+        target: targetNominal,
         achievement: achievementNominal,
-        percentage,
+        percentage: Number(percentage.toFixed(2)),
       };
     });
   }
 
   async getProductTargetSummary(year?: number) {
-    // ✅ Typed where filter
     const whereClause: Prisma.TargetWhereInput = {};
     if (year !== undefined) {
       whereClause.year = year;
@@ -54,7 +55,7 @@ export class AnalyticsService {
       product_id: r.product_id,
       product_name:
         products.find((p) => p.id === r.product_id)?.name || 'Unknown Product',
-      total_nominal: r._sum.nominal || 0,
+      total_nominal: Number(r._sum.nominal ?? 0),
     }));
   }
 
@@ -84,8 +85,8 @@ export class AnalyticsService {
 
     for (const t of targets) {
       const month = t.month;
-      const targetValue = t.nominal;
-      const achievementValue = t.Achievement?.nominal ?? 0;
+      const targetValue = Number(t.nominal);
+      const achievementValue = Number(t.Achievement?.nominal ?? 0);
 
       const current = summary.get(month) || { target: 0, achievement: 0 };
       current.target += targetValue;
@@ -100,7 +101,9 @@ export class AnalyticsService {
         target: data.target,
         achievement: data.achievement,
         percentage:
-          data.target > 0 ? (data.achievement / data.target) * 100 : 0,
+          data.target > 0
+            ? Number(((data.achievement / data.target) * 100).toFixed(2))
+            : 0,
       }));
   }
 
@@ -127,16 +130,18 @@ export class AnalyticsService {
         })[];
 
         const totalTarget = targets.reduce(
-          (sum, t) => sum + (t.nominal || 0),
+          (sum, t) => sum + Number(t.nominal ?? 0),
           0,
         );
         const totalAchieved = targets.reduce(
-          (sum, t) => sum + (t.Achievement?.nominal || 0),
+          (sum, t) => sum + Number(t.Achievement?.nominal ?? 0),
           0,
         );
 
         const achievement_rate =
-          totalTarget > 0 ? (totalAchieved / totalTarget) * 100 : 0;
+          totalTarget > 0
+            ? Number(((totalAchieved / totalTarget) * 100).toFixed(2))
+            : 0;
 
         return {
           employee_id: emp.id,
@@ -144,7 +149,7 @@ export class AnalyticsService {
           office_location: emp.office_location,
           total_target: totalTarget,
           total_achievement: totalAchieved,
-          achievement_rate: Number(achievement_rate.toFixed(2)),
+          achievement_rate,
         };
       })
       .sort((a, b) => b.achievement_rate - a.achievement_rate)

@@ -32,20 +32,16 @@ model Target {
   id          String    @id @default(uuid())
   employee_id String
   product_id  String
-  nominal     Int
-  month       Int // NEW: store month number (1–12)
-  year        Int // NEW: store year for easier querying
+  nominal     BigInt // ← change from Int to BigInt
+  month       Int
+  year        Int
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
 
   employee    Employee?    @relation(fields: [employee_id], references: [id])
   Product     Product?     @relation(fields: [product_id], references: [id])
-  Achievement Achievement? // still 1-to-1
-
-  @@unique([employee_id, month, year]) // each employee only one target per month
-  @@index([employee_id])
-  @@index([product_id])
+  Achievement Achievement?
 }
 
 model Achievement {
