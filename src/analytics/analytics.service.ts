@@ -7,7 +7,10 @@ export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
 
   async getEmployeePerformance(employeeId: string, year?: number) {
-    const whereClause: Prisma.TargetWhereInput = { employee_id: employeeId };
+    const whereClause: Prisma.TargetWhereInput = {
+      employee_id: employeeId,
+      deleted_at: null, // ✅ exclude soft-deleted
+    };
     if (year !== undefined) {
       whereClause.year = year;
     }
@@ -36,7 +39,9 @@ export class AnalyticsService {
   }
 
   async getProductTargetSummary(year?: number) {
-    const whereClause: Prisma.TargetWhereInput = {};
+    const whereClause: Prisma.TargetWhereInput = {
+      deleted_at: null, // ✅ exclude soft-deleted
+    };
     if (year !== undefined) {
       whereClause.year = year;
     }
@@ -61,6 +66,7 @@ export class AnalyticsService {
 
   async getAvailableYears(): Promise<number[]> {
     const years = await this.prisma.target.findMany({
+      where: { deleted_at: null }, // ✅ exclude soft-deleted
       distinct: ['year'],
       select: { year: true },
       orderBy: { year: 'asc' },
@@ -70,7 +76,9 @@ export class AnalyticsService {
   }
 
   async getOverallMonthlySummary(year?: number) {
-    const whereClause: Prisma.TargetWhereInput = {};
+    const whereClause: Prisma.TargetWhereInput = {
+      deleted_at: null, // ✅ exclude soft-deleted
+    };
     if (year !== undefined) {
       whereClause.year = year;
     }
@@ -113,12 +121,10 @@ export class AnalyticsService {
       include: {
         targets: {
           where: {
-            deleted_at: null,
+            deleted_at: null, // ✅ exclude soft-deleted
             ...(year && { year }),
           },
-          include: {
-            Achievement: true,
-          },
+          include: { Achievement: true },
         },
       },
     });
