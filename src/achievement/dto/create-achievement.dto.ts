@@ -5,7 +5,7 @@ export class CreateAchievementDto {
   target_id: string;
 
   @IsInt()
-  nominal: number;
+  nominal: bigint;
 }
 
 export class UpdateAchievementDto {

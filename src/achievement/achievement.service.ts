@@ -29,7 +29,7 @@ export class AchievementService {
     return this.prisma.achievement.create({
       data: {
         target_id: data.target_id,
-        nominal: data.nominal,
+        nominal: BigInt(data.nominal),
       },
       include: { target: true },
     });
@@ -43,7 +43,7 @@ export class AchievementService {
 
     return this.prisma.achievement.update({
       where: { target_id: targetId },
-      data: { nominal: dto.nominal },
+      data: { nominal: BigInt(dto.nominal) },
       include: { target: true },
     });
   }
