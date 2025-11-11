@@ -9,9 +9,14 @@ export class AnalyticsController {
   getEmployeePerformance(
     @Param('employeeId') employeeId: string,
     @Query('year') year?: string,
+    @Query('productId') productId?: string,
   ) {
     const parsedYear = year ? Number(year) : undefined;
-    return this.analyticsService.getEmployeePerformance(employeeId, parsedYear);
+    return this.analyticsService.getEmployeePerformance(
+      employeeId,
+      parsedYear,
+      productId,
+    );
   }
 
   @Get('products/targets')
