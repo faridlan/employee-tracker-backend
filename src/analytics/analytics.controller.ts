@@ -42,4 +42,10 @@ export class AnalyticsController {
     const yearNumber = year ? Number(year) : undefined;
     return this.analyticsService.getTopEmployeesByAchievement(yearNumber);
   }
+
+  @Get('summary/monthly-by-category')
+  getMonthlyByCategory(@Query('year') year?: string) {
+    const parsed = year ? Number(year) : undefined;
+    return this.analyticsService.getOverallMonthlySummaryByCategory(parsed);
+  }
 }

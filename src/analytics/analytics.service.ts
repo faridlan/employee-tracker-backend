@@ -54,37 +54,42 @@ export class AnalyticsService {
       };
     });
   }
+
   async getProductTargetSummary(year?: number) {
     const whereClause: Prisma.TargetWhereInput = {
-      deleted_at: null, // ✅ exclude soft-deleted
+      deleted_at: null,
     };
 
-    // Filter by year if provided
     if (year !== undefined) {
       whereClause.year = year;
     }
 
-    // ✅ Group by product AND month
     const result = await this.prisma.target.groupBy({
       by: ['product_id', 'month', 'year'],
       _sum: { nominal: true },
       where: whereClause,
     });
 
-    // Get product names
+    // Fetch product + category
     const products = await this.prisma.product.findMany({
-      select: { id: true, name: true },
+      select: {
+        id: true,
+        name: true,
+        category: { select: { name: true } }, // ✅ include category
+      },
     });
 
-    // Map results
-    return result.map((r) => ({
-      product_id: r.product_id,
-      product_name:
-        products.find((p) => p.id === r.product_id)?.name || 'Unknown Product',
-      month: r.month,
-      year: r.year,
-      total_nominal: Number(r._sum.nominal ?? 0),
-    }));
+    return result.map((r) => {
+      const product = products.find((p) => p.id === r.product_id);
+      return {
+        product_id: r.product_id,
+        product_name: product?.name || 'Unknown Product',
+        category_name: product?.category?.name || 'Uncategorized', // ⬅️ NEW FIELD
+        month: r.month,
+        year: r.year,
+        total_nominal: Number(r._sum.nominal ?? 0),
+      };
+    });
   }
 
   async getAvailableYears(): Promise<number[]> {
@@ -185,5 +190,62 @@ export class AnalyticsService {
       .slice(0, 5);
 
     return ranked;
+  }
+
+  async getOverallMonthlySummaryByCategory(year?: number) {
+    const whereClause: Prisma.TargetWhereInput = {
+      deleted_at: null,
+    };
+    if (year !== undefined) whereClause.year = year;
+
+    const targets = await this.prisma.target.findMany({
+      where: whereClause,
+      include: {
+        Achievement: true,
+        Product: {
+          select: {
+            id: true,
+            name: true,
+            category: { select: { name: true } },
+          },
+        },
+      },
+    });
+
+    // Group by category → month → totals
+    const categoryMap = new Map<
+      string,
+      Map<number, { target: number; achievement: number }>
+    >();
+
+    for (const t of targets) {
+      const category = t.Product?.category?.name || 'Uncategorized';
+      const month = t.month;
+
+      if (!categoryMap.has(category)) categoryMap.set(category, new Map());
+      const monthMap = categoryMap.get(category)!;
+
+      const prev = monthMap.get(month) || { target: 0, achievement: 0 };
+      prev.target += Number(t.nominal);
+      prev.achievement += Number(t.Achievement?.nominal ?? 0);
+
+      monthMap.set(month, prev);
+    }
+
+    // Convert to JSON format
+    return Array.from(categoryMap.entries()).map(([category, monthMap]) => ({
+      category_name: category,
+      months: Array.from(monthMap.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([month, data]) => ({
+          month,
+          target: data.target,
+          achievement: data.achievement,
+          percentage:
+            data.target > 0
+              ? Number(((data.achievement / data.target) * 100).toFixed(2))
+              : 0,
+        })),
+    }));
   }
 }
